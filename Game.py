@@ -51,7 +51,7 @@ class Game():
         pass
 
     def Amor(self):
-        pass
+        self.doAmor = False
     def Seherin(self):
         pass
     def Werwolf(self):
