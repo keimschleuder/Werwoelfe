@@ -18,8 +18,14 @@ def RoleCount(playersCount):
     for _ in range(5):
         count.append(1)
 
+    return count
+
 def AssignRoles(players: list):
     num = len(players)
+    if num <= 7:
+        return "Not enough players"
+    elif num >= 16:
+        return "Too many players"
     count = RoleCount(num)
     playersNew = []
     for _ in range(num):
@@ -27,7 +33,17 @@ def AssignRoles(players: list):
         playersNew.append(players[rand])
         players.pop(rand)
 
-    # TODO: Assign Roles
+    current = 0
+    for i in range(len(count)):
+        myCnt = count[i]
+        if myCnt != None and myCnt != -1:
+            for _ in range(myCnt):
+                playersNew[current].setRole(i)
+                current = current + 1
+
+    for _ in range(num - current):
+        playersNew[current].setRole(Roles.DORFBEWOHNER.value)
+        current = current + 1
 
     return playersNew
 
@@ -60,6 +76,7 @@ class Player():
         self.playerID = id
         self.inLove = False
         self.loverIsOpponentTeam = False
+        self.role = None
     
     def setRole(self, role):
         self.role = role
@@ -94,3 +111,31 @@ class Game():
     def Hexe(self):
         pass
         
+# Testing only
+
+myPlayers = []
+for i in range(16):
+    myPlayers.append(Player(i))
+
+roles = AssignRoles(myPlayers)
+
+print(f"Length: {len(roles)}")
+
+for myRole in roles:
+    match myRole.role:
+        case Roles.WEISSER_WOLF.value:
+            print(Roles.WEISSER_WOLF.name, myRole.playerID)
+        case Roles.WERWOLF.value:
+            print(Roles.WERWOLF.name, myRole.playerID)
+        case Roles.DORFBEWOHNER.value:
+            print(Roles.DORFBEWOHNER.name, myRole.playerID)
+        case Roles.HEXE.value:
+            print(Roles.HEXE.name, myRole.playerID)
+        case Roles.SEHERIN.value:
+            print(Roles.SEHERIN.name, myRole.playerID)
+        case Roles.AMOR.value:
+            print(Roles.AMOR.name, myRole.playerID)
+        case Roles.JAEGER.value:
+            print(Roles.JAEGER.name, myRole.playerID)
+        case Roles.RABE.value:
+            print(Roles.RABE.name, myRole.playerID)
