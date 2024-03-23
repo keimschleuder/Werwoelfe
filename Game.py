@@ -10,21 +10,29 @@ def RoleCount(playersCount):
     count = []
     if werewolves[playersCount - 8] >= 3: # Weisser Wolf
         count.append(1)
+        count.append(werewolves[playersCount - 8] - 1) # Werevolves
     else:
         count.append(None)
-    count.append(werewolves[playersCount - 8]) # Werevolves
+        count.append(werewolves[playersCount - 8]) # Werevolves
     count.append(-1) # Dorfbewohner
-    # Hexe, Seherin, Amor, Jaeger und Rabe
-    for _ in range(5):
+    # Hexe, Seherin, Amor, Jaeger, Rabe und Bandit
+    for _ in range(6):
         count.append(1)
+
+    if playersCount >= 14:
+        count[Roles.JAEGER.value] = count[Roles.JAEGER.value] + 2
+        count[Roles.BANDIT.value] = count[Roles.BANDIT.value] + 2
+    elif playersCount >= 12:
+        count[Roles.JAEGER.value] = count[Roles.JAEGER.value] + 1
+        count[Roles.BANDIT.value] = count[Roles.BANDIT.value] + 1
 
     return count
 
 def AssignRoles(players: list):
     num = len(players)
-    if num <= 7:
+    if num < 8:
         return "Not enough players"
-    elif num >= 16:
+    elif num > 16:
         return "Too many players"
     count = RoleCount(num)
     playersNew = []
@@ -56,6 +64,7 @@ class Roles(Enum):
     AMOR = 5
     JAEGER = 6
     RABE = 7
+    BANDIT = 8
 
 class Cycle(Enum):
     DAY = 0
@@ -63,6 +72,7 @@ class Cycle(Enum):
     SEHERIN = 2
     WERWOLF = 3
     HEXE = 4
+    RABE = 5
 
 class PlayerState(Enum):
     GOOD = 0
@@ -78,7 +88,7 @@ class Player():
         self.loverIsOpponentTeam = False
         self.role = None
     
-    def setRole(self, role):
+    def setRole(self, role: int):
         self.role = role
         if self.role >= 2:
             self.playerState = PlayerState.GOOD.value
@@ -87,10 +97,14 @@ class Player():
 
 class Game():
     def __init__(self) -> None:
-        self.state = Cycle.AMOR.value
+        self.state = Cycle.DAY.value
         self.players = []
         self.lovers = []
         self.hauptmann = None
+
+    def startGame(self):
+        self.players = AssignRoles(self.players)
+        self.nextCycle()
 
     def nextCycle(self):
         self.state = self.state + 1
@@ -99,16 +113,39 @@ class Game():
         if self.state == 5:
             self.state = Cycle.DAY.value
 
+        match self.state:
+            case Cycle.DAY.value:
+                self.Abstimmung()
+            case Cycle.AMOR.value:
+                self.Amor()
+            case Cycle.SEHERIN.value:
+                self.Seherin()
+            case Cycle.WERWOLF.value:
+                self.Werwolf()
+            case Cycle.HEXE.value:
+                self.Hexe()
+            case Cycle.RABE.value:
+                self.Rabe()
+
     def Abstimmung(self):
         pass
 
     def Amor(self):
         self.doAmor = False
+
+        # Let the Amor select two Roles
+        lover1 = self.players[2]
+        lover2 = self.players[4]
+
+        self.lovers = [lover1, lover2]
+
     def Seherin(self):
         pass
     def Werwolf(self):
         pass
     def Hexe(self):
+        pass
+    def Rabe(self):
         pass
         
 # Testing only
@@ -139,3 +176,5 @@ for myRole in roles:
             print(Roles.JAEGER.name, myRole.playerID)
         case Roles.RABE.value:
             print(Roles.RABE.name, myRole.playerID)
+        case Roles.BANDIT.value:
+            print(Roles.BANDIT.name, myRole.playerID)
