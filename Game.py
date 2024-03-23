@@ -128,7 +128,7 @@ class Game():
                 self.Rabe()
 
     def Abstimmung(self):
-        pass
+        self.nextCycle()
 
     def Amor(self):
         self.doAmor = False
@@ -139,14 +139,15 @@ class Game():
 
         self.lovers = [lover1, lover2]
 
+        self.nextCycle()
     def Seherin(self):
-        pass
+        self.nextCycle()
     def Werwolf(self):
-        pass
+        self.nextCycle()
     def Hexe(self):
-        pass
+        self.nextCycle()
     def Rabe(self):
-        pass
+        self.nextCycle()
         
 # Testing only
 
