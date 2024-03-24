@@ -132,10 +132,13 @@ class Game():
         werewolvesCount = len(aliveWerewolves)
         villagersCount = len(aliveVillagers)
         deadCount = len(deadPlayers)
+        playerCount = len(self.players)
         loversCount = loversAreAlive + loversAreAlive
 
-        if werewolvesCount > villagersCount:
-            return Winners.WEREWOLVES.value
+        if deadCount == playerCount:
+            return Winners.NONE.value
+        if werewolvesCount > villagersCount + loversCount:
+            return Winners.WEREWOLVES.value    
 
     def playerById(self, targetID):
         for myPlayer in self.players:
@@ -158,7 +161,9 @@ class Game():
                 otherLover = self.lovers[0] if self.lovers.index(player) == 1 else self.lovers[1]
                 self.exile(otherLover, repeat = False)
 
-            self.checkWin()
+            winners = self.checkWin()
+
+            return winners
 
     def nextCycle(self):
         self.state = self.state + 1
@@ -212,34 +217,4 @@ class Game():
         self.nextCycle()
     def Rabe(self):
         self.nextCycle()
-        
-# Testing only
 
-myPlayers = []
-for i in range(16):
-    myPlayers.append(Player(i))
-
-roles = AssignRoles(myPlayers)
-
-print(f"Length: {len(roles)}")
-
-for myRole in roles:
-    match myRole.role:
-        case Roles.WEISSER_WOLF.value:
-            print(Roles.WEISSER_WOLF.name, myRole.playerID)
-        case Roles.WERWOLF.value:
-            print(Roles.WERWOLF.name, myRole.playerID)
-        case Roles.DORFBEWOHNER.value:
-            print(Roles.DORFBEWOHNER.name, myRole.playerID)
-        case Roles.HEXE.value:
-            print(Roles.HEXE.name, myRole.playerID)
-        case Roles.SEHERIN.value:
-            print(Roles.SEHERIN.name, myRole.playerID)
-        case Roles.AMOR.value:
-            print(Roles.AMOR.name, myRole.playerID)
-        case Roles.JAEGER.value:
-            print(Roles.JAEGER.name, myRole.playerID)
-        case Roles.RABE.value:
-            print(Roles.RABE.name, myRole.playerID)
-        case Roles.BANDIT.value:
-            print(Roles.BANDIT.name, myRole.playerID)
