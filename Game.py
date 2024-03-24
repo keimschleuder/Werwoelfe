@@ -134,6 +134,9 @@ class Game():
         deadCount = len(deadPlayers)
         loversCount = loversAreAlive + loversAreAlive
 
+        if werewolvesCount > villagersCount:
+            return Winners.WEREWOLVES.value
+
     def playerById(self, targetID):
         for myPlayer in self.players:
             if myPlayer.playerID == targetID:
