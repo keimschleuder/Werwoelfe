@@ -161,7 +161,7 @@ class Game():
         self.state = self.state + 1
         if self.state == Cycle.AMOR.value and not doAmor:
             self.state = self.state + 1
-        if self.state == 5:
+        if self.state == 6:
             self.state = Cycle.DAY.value
 
         match self.state:
