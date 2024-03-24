@@ -86,7 +86,7 @@ class PlayerState(Enum):
     GOOD = 0
     EVIL = 1
     DEAD = 2
-    LOVER = 3
+    LOVER = 3 # Nur, wenn Lover ein eigenes TEam sind
 
 class Player():
     def __init__(self, id) -> None:
@@ -135,10 +135,16 @@ class Game():
         playerCount = len(self.players)
         loversCount = loversAreAlive + loversAreAlive
 
-        if deadCount == playerCount:
+        if deadCount == playerCount: # Alle Tot
             return Winners.NONE.value
-        if werewolvesCount > villagersCount + loversCount:
-            return Winners.WEREWOLVES.value    
+        if werewolvesCount > villagersCount + loversCount: # Werwoelfe sind in der Ueberzahl
+            return Winners.WEREWOLVES.value
+        if werewolvesCount == villagersCount == 0: # Nur Lover leben noch (Alle Tot ist schon ausgeschlossen)
+            return Winners.LOVERS.value
+        if werewolvesCount == loversCount == 0: # Nur Dorfbewohner leben noch
+            return Winners.DORFBEWOHNER.value
+        
+        return Winners.GAME_STILL_GOING.value
 
     def playerById(self, targetID):
         for myPlayer in self.players:
@@ -208,6 +214,9 @@ class Game():
         for myLover in self.lovers:
             myLover.inLove = True
 
+        # Notify the Lovers 
+        # Just wheter they are on the same team or not
+
         self.nextCycle()
     def Seherin(self):
         self.nextCycle()
@@ -217,4 +226,3 @@ class Game():
         self.nextCycle()
     def Rabe(self):
         self.nextCycle()
-
