@@ -19,6 +19,7 @@ def RoleCount(playersCount):
     for _ in range(6):
         count.append(1)
 
+    # More passive Roles
     if playersCount >= 14:
         count[Roles.JAEGER.value] = count[Roles.JAEGER.value] + 2
         count[Roles.BANDIT.value] = count[Roles.BANDIT.value] + 2
@@ -55,6 +56,13 @@ def AssignRoles(players: list):
 
     return playersNew
 
+class Winners(Enum):
+    DORFBEWOHNER = 0
+    WEREWOLVES = 1
+    LOVERS = 2
+    NONE = 3
+    GAME_STILL_GOING = 4
+
 class Roles(Enum):
     WEISSER_WOLF = 0
     WERWOLF = 1
@@ -78,8 +86,7 @@ class PlayerState(Enum):
     GOOD = 0
     EVIL = 1
     DEAD = 2
-    GOOD_LOVER = 3
-    EVIL_LOVER = 4
+    LOVER = 3
 
 class Player():
     def __init__(self, id) -> None:
@@ -105,6 +112,50 @@ class Game():
     def startGame(self):
         self.players = AssignRoles(self.players)
         self.nextCycle()
+
+    def checkWin(self):
+        aliveWerewolves = []
+        aliveVillagers = []
+        deadPlayers = []
+        loversAreAlive = False
+        for myPlayer in self.players:
+            match myPlayer.playerState:
+                case PlayerState.GOOD.value:
+                    aliveVillagers.append(myPlayer)
+                case PlayerState.EVIL.value:
+                    aliveWerewolves.append(myPlayer)
+                case PlayerState.DEAD.value:
+                    deadPlayers.append(myPlayer)
+                case PlayerState.LOVER.value:
+                    loversAreAlive = True
+
+        werewolvesCount = len(aliveWerewolves)
+        villagersCount = len(aliveVillagers)
+        deadCount = len(deadPlayers)
+        loversCount = loversAreAlive + loversAreAlive
+
+    def playerById(self, targetID):
+        for myPlayer in self.players:
+            if myPlayer.playerID == targetID:
+                return myPlayer
+
+    def exile(self, playerID, repeat = True):
+        player = self.playerById(playerID)
+        if player != None:
+            player.playerState = PlayerState.DEAD.value
+            match player.role:
+                case Roles.JAEGER.value:
+                    targetID = player.playerID + 1
+                    self.exile(targetID)
+                case Roles.BANDIT.value:
+                    targets = [player.playerID + 1, player.playerID - 1]
+                    for myTarget in targets:
+                        self.exile(myTarget)
+            if player in self.lovers and repeat:
+                otherLover = self.lovers[0] if self.lovers.index(player) == 1 else self.lovers[1]
+                self.exile(otherLover, repeat = False)
+
+            self.checkWin()
 
     def nextCycle(self):
         self.state = self.state + 1
@@ -138,6 +189,16 @@ class Game():
         lover2 = self.players[4]
 
         self.lovers = [lover1, lover2]
+
+        if lover1.playerState != lover2.playerState:
+            self.loversAreTeirOwnTeam = True
+            for myLover in self.lovers:
+                myLover.playerState = PlayerState.LOVER.value
+        else:
+            self.loversAreTeirOwnTeam = False
+
+        for myLover in self.lovers:
+            myLover.inLove = True
 
         self.nextCycle()
     def Seherin(self):
