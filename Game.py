@@ -199,8 +199,8 @@ class Game():
         self.doAmor = False
 
         # Let the Amor select two Roles
-        lover1 = self.players[2]
-        lover2 = self.players[4]
+        lover1 = input("ID of Lover 1: ")
+        lover2 = input("ID of Lover 2: ")
 
         self.lovers = [lover1, lover2]
 
@@ -219,6 +219,11 @@ class Game():
 
         self.nextCycle()
     def Seherin(self):
+        targetID = input("ID of the Target: ")
+        target = self.playerById(targetID)
+        
+        print(target.playerState)
+        
         self.nextCycle()
     def Werwolf(self):
         self.nextCycle()
