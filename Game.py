@@ -95,6 +95,7 @@ class Player():
         self.inLove = False
         self.loverIsOpponentTeam = False
         self.role = None
+        self.playerState = None
     
     def setRole(self, role: int):
         self.role = role
@@ -110,6 +111,11 @@ class Game():
         self.lovers = []
         self.hauptmann = None
         self.doWeisserWolf = False
+        self.doAmor = True
+
+    def joinGame(self, playerID):
+        player = Player(playerID)
+        self.players.append(player)
 
     def startGame(self):
         self.players = AssignRoles(self.players)
@@ -175,7 +181,7 @@ class Game():
 
     def nextCycle(self):
         self.state = self.state + 1
-        if self.state == Cycle.AMOR.value and not doAmor:
+        if self.state == Cycle.AMOR.value and not self.doAmor:
             self.state = self.state + 1
         if self.state == 6:
             self.state = Cycle.DAY.value
@@ -205,8 +211,8 @@ class Game():
         self.doAmor = False
 
         # Let the Amor select two Roles
-        lover1 = input("ID of Lover 1: ")
-        lover2 = input("ID of Lover 2: ")
+        lover1 = self.playerById(int(input("ID of Lover 1: ")))
+        lover2 = self.playerById(int(input("ID of Lover 2: ")))
 
         self.lovers = [lover1, lover2]
 
@@ -221,17 +227,17 @@ class Game():
             myLover.inLove = True
 
         if self.loversAreTeirOwnTeam:
-            print(f"Lovers ID{lover1} and ID{lover2} are opponents")
+            print(f"Lovers ID{lover1.playerID} and ID{lover2.playerID} are opponents")
         else:
-            print(f"Lovers ID{lover1} and ID{lover2} are on the same team")
+            print(f"Lovers ID{lover1.playerID} and ID{lover2.playerID} are on the same team")
 
         self.nextCycle()
     def Seherin(self):
-        targetID = input("ID of the Target: ")
+        targetID = int(input("ID of the Target: "))
         target = self.playerById(targetID)
         
         print(target.playerState)
-        
+
         self.nextCycle()
     def Werwolf(self):
         self.nextCycle()
@@ -241,3 +247,12 @@ class Game():
         self.nextCycle()
     def Rabe(self):
         self.nextCycle()
+
+# Testing
+        
+game = Game()
+
+for i in range(16):
+    game.joinGame(i)
+
+game.startGame()
