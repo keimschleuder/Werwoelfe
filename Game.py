@@ -79,8 +79,9 @@ class Cycle(Enum):
     AMOR = 1
     SEHERIN = 2
     WERWOLF = 3
-    HEXE = 4
-    RABE = 5
+    WEISSER_WOLF = 4
+    HEXE = 5
+    RABE = 6
 
 class PlayerState(Enum):
     GOOD = 0
@@ -108,6 +109,7 @@ class Game():
         self.players = []
         self.lovers = []
         self.hauptmann = None
+        self.doWeisserWolf = False
 
     def startGame(self):
         self.players = AssignRoles(self.players)
@@ -177,6 +179,8 @@ class Game():
             self.state = self.state + 1
         if self.state == 6:
             self.state = Cycle.DAY.value
+        if self.state == Cycle.WEISSER_WOLF.value and not self.doWeisserWolf :
+            self.state = self.state + 1
 
         match self.state:
             case Cycle.DAY.value:
@@ -187,6 +191,8 @@ class Game():
                 self.Seherin()
             case Cycle.WERWOLF.value:
                 self.Werwolf()
+            case Cycle.WEISSER_WOLF.value:
+                self.WeisserWolf()
             case Cycle.HEXE.value:
                 self.Hexe()
             case Cycle.RABE.value:
@@ -221,6 +227,8 @@ class Game():
     def Seherin(self):
         self.nextCycle()
     def Werwolf(self):
+        self.nextCycle()
+    def WeisserWolf(self):
         self.nextCycle()
     def Hexe(self):
         self.nextCycle()
