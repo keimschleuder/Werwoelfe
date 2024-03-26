@@ -220,8 +220,10 @@ class Game():
         for myLover in self.lovers:
             myLover.inLove = True
 
-        # Notify the Lovers 
-        # Just wheter they are on the same team or not
+        if self.loversAreTeirOwnTeam:
+            print(f"Lovers ID{lover1} and ID{lover2} are opponents")
+        else:
+            print(f"Lovers ID{lover1} and ID{lover2} are on the same team")
 
         self.nextCycle()
     def Seherin(self):
