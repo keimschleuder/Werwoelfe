@@ -237,13 +237,38 @@ class Game():
         targetID = int(input("ID of the Target: "))
         target = self.playerById(targetID)
         
-        print(target.playerState)
+        match target.playerState:
+            case PlayerState.GOOD.value:
+                print(PlayerState.GOOD.name)
+            case PlayerState.EVIL.value:
+                print(PlayerState.EVIL.name)
+            case PlayerState.DEAD.value:
+                print(PlayerState.DEAD.name)
+            case PlayerState.LOVER.value:
+                print(PlayerState.LOVER.name)
 
         self.nextCycle()
     def Werwolf(self):
         self.nextCycle()
     def WeisserWolf(self):
         self.doWeisserWolf = False
+
+        werewolves = []
+        for myPlayer in self.players:
+            if myPlayer.role == Roles.WERWOLF.value and myPlayer.playerState != PlayerState.DEAD.value:
+                werewolves.append(myPlayer.playerID)
+
+        if len(werewolves) > 0:
+            print(f"You can Kill: {werewolves}")
+            victim = int(input("Which one do you chose? (-1 for nobody): "))
+
+            if victim != -1 and victim in werewolves: # Can not kill Lovers
+                self.exile(victim)
+            else:
+                print("Give a valid Player")
+        else:
+            print("No more Werewolves")
+
         self.nextCycle()
     def Hexe(self):
         self.nextCycle()
