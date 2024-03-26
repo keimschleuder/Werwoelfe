@@ -187,6 +187,7 @@ class Game():
             self.state = Cycle.DAY.value
         if self.state == Cycle.WEISSER_WOLF.value and not self.doWeisserWolf :
             self.state = self.state + 1
+            self.doWeisserWolf = True
 
         match self.state:
             case Cycle.DAY.value:
@@ -242,6 +243,7 @@ class Game():
     def Werwolf(self):
         self.nextCycle()
     def WeisserWolf(self):
+        self.doWeisserWolf = False
         self.nextCycle()
     def Hexe(self):
         self.nextCycle()
