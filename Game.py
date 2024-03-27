@@ -171,7 +171,7 @@ class Game():
                     targets = [player.playerID + 1, player.playerID - 1]
                     for myTarget in targets:
                         self.exile(myTarget)
-            if player in self.lovers and repeat:
+            if player.inLove and repeat:
                 otherLover = self.lovers[0] if self.lovers.index(player) == 1 else self.lovers[1]
                 self.exile(otherLover, repeat = False)
 
