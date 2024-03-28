@@ -114,12 +114,36 @@ class Game():
         self.doWeisserWolf = False
         self.doAmor = True
 
+    def findAllPlayersWithRole(self, roleID):
+        playersWithRole = []
+        for myPlayer in self.players:
+            if myPlayer.role == roleID:
+                playersWithRole.append(myPlayer)
+        return playersWithRole
+
+    def findPlayerByRole(self, roleID):
+        for myPlayer in self.players:
+            if myPlayer.role == roleID:
+                return myPlayer
+        return None
+
     def joinGame(self, playerID):
         player = Player(playerID)
         self.players.append(player)
 
     def startGame(self):
         self.players = AssignRoles(self.players)
+
+        self.werwoelfe = self.findAllPlayersWithRole(Roles.WERWOLF.value)
+        self.weisserWolfPlayer = self.findPlayerByRole(Roles.WEISSER_WOLF.value)
+        self.seherinPlayer = self.findPlayerByRole(Roles.SEHERIN.value)
+        self.hexePlayer = self.findPlayerByRole(Roles.HEXE.value)
+        self.amorPlayer = self.findPlayerByRole(Roles.AMOR.value)
+        self.rabePlayer = self.findPlayerByRole(Roles.RABE.value)
+        self.jaegerPlayers = self.findAllPlayersWithRole(Roles.JAEGER.value)
+        self.banditPlayers = self.findAllPlayersWithRole(Roles.BANDIT.value)
+        self.villagers = self.findAllPlayersWithRole(Roles.DORFBEWOHNER.value)
+
         self.nextCycle()
 
     def checkWin(self):
@@ -167,8 +191,11 @@ class Game():
             player.playerState = PlayerState.DEAD.value
             match player.role:
                 case Roles.JAEGER.value:
-                    targetID = player.playerID + 1
-                    self.exile(targetID)
+                    try:
+                        targetID = int(input("Which other player do you want to kill: "))
+                        self.exile(targetID, repeat = True)
+                    except:
+                        print("Enter Valid Player ID")
                 case Roles.BANDIT.value:
                     targets = [player.playerID + 1, player.playerID - 1]
                     for myTarget in targets:
@@ -183,13 +210,25 @@ class Game():
 
     def nextCycle(self):
         self.state = self.state + 1
-        if self.state == Cycle.AMOR.value and not self.doAmor:
+        if (self.state == Cycle.AMOR.value and not self.doAmor) or (self.state == Cycle.AMOR.value and self.amorPlayer.playerState == PlayerState.DEAD.value):
+            self.state = self.state + 1
+        if self.state == Cycle.SEHERIN.value and self.seherinPlayer.playerState == PlayerState.DEAD.value:
+            self.state = self.state + 1
+        skip = True
+        for myWerewolf in self.werwoelfe:
+            if myWerewolf.playerState != PlayerState.DEAD.value:
+                skip = False
+        if self.state == Cycle.WERWOLF.value and skip:
+            self.state = self.state + 1
+        if (self.state == Cycle.WEISSER_WOLF.value and not self.doWeisserWolf) or (self.state == Cycle.WEISSER_WOLF.value and self.weisserWolfPlayer.playerState == PlayerState.DEAD.value):
+            self.state = self.state + 1
+            self.doWeisserWolf = True
+        if self.state == Cycle.HEXE.value and self.hexePlayer.playerState == PlayerState.DEAD.value:
+            self.state = self.state + 1
+        if self.state == Cycle.RABE.value and self.rabePlayer.playerState == PlayerState.DEAD.value:
             self.state = self.state + 1
         if self.state == 6:
             self.state = Cycle.DAY.value
-        if self.state == Cycle.WEISSER_WOLF.value and not self.doWeisserWolf:
-            self.state = self.state + 1
-            self.doWeisserWolf = True
 
         match self.state:
             case Cycle.DAY.value:
@@ -213,28 +252,29 @@ class Game():
     def Amor(self):
         self.doAmor = False
 
-        # Let the Amor select two Roles
-        lover1 = self.playerById(int(input("ID of Lover 1: ")))
-        lover2 = self.playerById(int(input("ID of Lover 2: ")))
+        try:
+            # Let the Amor select two Roles
+            lover1 = self.playerById(int(input("ID of Lover 1: ")))
+            lover2 = self.playerById(int(input("ID of Lover 2: ")))
 
-        self.lovers = [lover1, lover2]
+            self.lovers = [lover1, lover2]
 
-        if lover1.playerState != lover2.playerState:
-            self.loversAreTeirOwnTeam = True
+            if lover1.playerState != lover2.playerState:
+                self.loversAreTeirOwnTeam = True
+                for myLover in self.lovers:
+                    myLover.playerState = PlayerState.LOVER.value
+            else:
+                self.loversAreTeirOwnTeam = False
+
             for myLover in self.lovers:
-                myLover.playerState = PlayerState.LOVER.value
-        else:
-            self.loversAreTeirOwnTeam = False
+                myLover.inLove = True
 
-        for myLover in self.lovers:
-            myLover.inLove = True
-
-        if self.loversAreTeirOwnTeam:
-            print(f"Lovers ID{lover1.playerID} and ID{lover2.playerID} are opponents")
-        else:
-            print(f"Lovers ID{lover1.playerID} and ID{lover2.playerID} are on the same team")
-
-        self.nextCycle()
+            if self.loversAreTeirOwnTeam:
+                print(f"Lovers ID{lover1.playerID} and ID{lover2.playerID} are opponents")
+            else:
+                print(f"Lovers ID{lover1.playerID} and ID{lover2.playerID} are on the same team")
+        finally:
+            self.nextCycle()
     def Seherin(self):
         try:
             targetID = int(input("ID of the Target: "))
