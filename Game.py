@@ -48,6 +48,7 @@ def AssignRoles(players: list):
         if myCnt != None and myCnt != -1:
             for _ in range(myCnt):
                 playersNew[current].setRole(i)
+                print(playersNew[current].playerID, playersNew[current].role) # Testing only
                 current = current + 1
 
     for _ in range(num - current):
@@ -174,7 +175,7 @@ class Game():
                         self.exile(myTarget)
             if player.inLove and repeat:
                 otherLover = self.lovers[0] if self.lovers.index(player) == 1 else self.lovers[1]
-                self.exile(otherLover, repeat = False)
+                self.exile(otherLover.playerID, repeat = False)
 
             winners = self.checkWin()
 
@@ -186,7 +187,7 @@ class Game():
             self.state = self.state + 1
         if self.state == 6:
             self.state = Cycle.DAY.value
-        if self.state == Cycle.WEISSER_WOLF.value and not self.doWeisserWolf :
+        if self.state == Cycle.WEISSER_WOLF.value and not self.doWeisserWolf:
             self.state = self.state + 1
             self.doWeisserWolf = True
 
