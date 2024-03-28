@@ -158,6 +158,7 @@ class Game():
         for myPlayer in self.players:
             if myPlayer.playerID == targetID:
                 return myPlayer
+        return None
 
     def exile(self, playerID, repeat = True):
         player = self.playerById(playerID)
@@ -234,20 +235,22 @@ class Game():
 
         self.nextCycle()
     def Seherin(self):
-        targetID = int(input("ID of the Target: "))
-        target = self.playerById(targetID)
-        
-        match target.playerState:
-            case PlayerState.GOOD.value:
-                print(PlayerState.GOOD.name)
-            case PlayerState.EVIL.value:
-                print(PlayerState.EVIL.name)
-            case PlayerState.DEAD.value:
-                print(PlayerState.DEAD.name)
-            case PlayerState.LOVER.value:
-                print(PlayerState.LOVER.name)
+        try:
+            targetID = int(input("ID of the Target: "))
+            target = self.playerById(targetID)
 
-        self.nextCycle()
+            if target != None: 
+                match target.playerState:
+                    case PlayerState.GOOD.value:
+                        print(PlayerState.GOOD.name)
+                    case PlayerState.EVIL.value:
+                        print(PlayerState.EVIL.name)
+                    case PlayerState.DEAD.value:
+                        print(PlayerState.DEAD.name)
+                    case PlayerState.LOVER.value:
+                        print(PlayerState.LOVER.name)
+        finally:
+            self.nextCycle()
     def Werwolf(self):
         self.nextCycle()
     def WeisserWolf(self):
