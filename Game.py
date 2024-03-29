@@ -110,6 +110,7 @@ class Game():
         self.state = Cycle.DAY.value
         self.players = []
         self.lovers = []
+        self.angeklagte = []
         self.hauptmann = None
         self.doWeisserWolf = False
         self.doAmor = True
@@ -185,7 +186,7 @@ class Game():
                 return myPlayer
         return None
 
-    def exile(self, playerID, repeat = True):
+    def exile(self, playerID: int, repeat = True):
         player = self.playerById(playerID)
         if player != None:
             player.playerState = PlayerState.DEAD.value
@@ -210,6 +211,8 @@ class Game():
 
     def nextCycle(self):
         self.state = self.state + 1
+
+        # Logic for skipping cycles
         if (self.state == Cycle.AMOR.value and not self.doAmor) or (self.state == Cycle.AMOR.value and self.amorPlayer.playerState == PlayerState.DEAD.value):
             self.state = self.state + 1
         if self.state == Cycle.SEHERIN.value and self.seherinPlayer.playerState == PlayerState.DEAD.value:
@@ -227,7 +230,7 @@ class Game():
             self.state = self.state + 1
         if self.state == Cycle.RABE.value and self.rabePlayer.playerState == PlayerState.DEAD.value:
             self.state = self.state + 1
-        if self.state == 6:
+        if self.state == 7:
             self.state = Cycle.DAY.value
 
         match self.state:
@@ -247,7 +250,13 @@ class Game():
                 self.Rabe()
 
     def Abstimmung(self):
-        self.nextCycle()
+        try:
+            # Anklagen
+            for myAngeklagte in self.angeklagte:
+                print(myAngeklagte.playerID)
+        finally:
+            self.angeklagte.clear()
+            self.nextCycle()
 
     def Amor(self):
         self.doAmor = False
@@ -304,7 +313,10 @@ class Game():
 
         if len(werewolves) > 0:
             print(f"You can Kill: {werewolves}")
-            victim = int(input("Which one do you chose? (-1 for nobody): "))
+            try:
+                victim = int(input("Which one do you chose? (-1 for nobody): "))
+            except:
+                victim = -1
 
             if victim != -1 and victim in werewolves: # Can not kill Lovers
                 self.exile(victim)
@@ -317,7 +329,13 @@ class Game():
     def Hexe(self):
         self.nextCycle()
     def Rabe(self):
-        self.nextCycle()
+        try:       
+            selectedPlayer = self.playerById(int(input("Do you know somebody suspicious?: ")))
+
+            if selectedPlayer.playerState != PlayerState.DEAD.value:
+                self.angeklagte.append(selectedPlayer)
+        finally:    
+            self.nextCycle()
 
 # Testing
         
