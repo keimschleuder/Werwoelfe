@@ -60,9 +60,10 @@ def AssignRoles(players: list):
 class Winners(Enum):
     DORFBEWOHNER = 0
     WEREWOLVES = 1
-    LOVERS = 2
-    NONE = 3
-    GAME_STILL_GOING = 4
+    WEISSER_WOLF = 2
+    LOVERS = 3
+    NONE = 4
+    GAME_STILL_GOING = 5
 
 class Roles(Enum):
     WEISSER_WOLF = 0
@@ -90,6 +91,11 @@ class PlayerState(Enum):
     DEAD = 2
     LOVER = 3 # Nur, wenn Lover ein eigenes TEam sind
 
+class HexeActions(Enum):
+    RETTEN = 0
+    TOETEN = 1
+    NICHTS = 2
+
 class Player():
     def __init__(self, id) -> None:
         self.playerID = id
@@ -114,6 +120,8 @@ class Game():
         self.hauptmann = None
         self.doWeisserWolf = False
         self.doAmor = True
+        self.HexeHasKilled = False
+        self.HexeHasHealed = False
 
     def findAllPlayersWithRole(self, roleID):
         playersWithRole = []
@@ -122,7 +130,7 @@ class Game():
                 playersWithRole.append(myPlayer)
         return playersWithRole
 
-    def findPlayerByRole(self, roleID):
+    def findPlayerByRole(self, roleID) -> Player:
         for myPlayer in self.players:
             if myPlayer.role == roleID:
                 return myPlayer
@@ -172,7 +180,10 @@ class Game():
         if deadCount == playerCount: # Alle Tot
             return Winners.NONE.value
         if werewolvesCount > villagersCount + loversCount: # Werwoelfe sind in der Ueberzahl
-            return Winners.WEREWOLVES.value
+            if len(werewolvesCount) == 1 and werewolvesCount[0] == self.weisserWolfPlayer: # Nur noch der weisse Wolf lebt
+                return Winners.WEISSER_WOLF.value
+            else: # Werwoelfe haben gewonnen, auch wenn der weisse Wolf noch lebt, dieser hat dann verloren
+                return Winners.WEREWOLVES.value
         if werewolvesCount == villagersCount == 0: # Nur Lover leben noch (Alle Tot ist schon ausgeschlossen)
             return Winners.LOVERS.value
         if werewolvesCount == loversCount == 0: # Nur Dorfbewohner leben noch
@@ -180,7 +191,7 @@ class Game():
         
         return Winners.GAME_STILL_GOING.value
 
-    def playerById(self, targetID):
+    def playerById(self, targetID) -> Player:
         for myPlayer in self.players:
             if myPlayer.playerID == targetID:
                 return myPlayer
@@ -188,8 +199,9 @@ class Game():
 
     def exile(self, playerID: int, repeat = True):
         player = self.playerById(playerID)
-        if player != None:
+        if player != None and player.playerState != PlayerState.DEAD.value:
             player.playerState = PlayerState.DEAD.value
+            print(f"Killed Player with ID{player.playerID} and Role {player.role}")
             match player.role:
                 case Roles.JAEGER.value:
                     try:
@@ -251,6 +263,7 @@ class Game():
 
     def Abstimmung(self):
         try:
+            print("Zeit für Anklagen")
             # Anklagen
             for myAngeklagte in self.angeklagte:
                 print(myAngeklagte.playerID)
@@ -302,6 +315,12 @@ class Game():
         finally:
             self.nextCycle()
     def Werwolf(self):
+        self.victimID = None
+        while self.victimID == None:
+            victim = int(input("Wen sollen die Werwoelfe Toeten? "))
+            if (self.playerById(victim) not in self.werwoelfe) and self.playerById(victim) != self.weisserWolfPlayer:
+                self.victimID = victim
+
         self.nextCycle()
     def WeisserWolf(self):
         self.doWeisserWolf = False
@@ -327,7 +346,26 @@ class Game():
 
         self.nextCycle()
     def Hexe(self):
-        self.nextCycle()
+        additionalVictimID = None
+        try:
+            print(f"Opfer der Werwoelfe hat ID{self.victimID}")
+            choice = int(input("Moechtest du retten (0)/jemand anderes toeten (1)/nichts tun (2)? "))
+            match choice:
+                case HexeActions.RETTEN.value:
+                    if not self.HexeHasHealed:
+                        self.victimID = None
+                        self.HexeHasHealed = True
+                case HexeActions.TOETEN.value:
+                    if not self.HexeHasKilled:
+                        additionalVictimID = int(input("Wen moechtest du zusaetzlich toeten?: "))
+                        self.HexeHasKilled = True
+        finally:
+            if self.victimID != None:
+                self.exile(self.victimID)
+            if additionalVictimID != None:
+                self.exile(additionalVictimID)
+            
+            self.nextCycle()
     def Rabe(self):
         try:       
             selectedPlayer = self.playerById(int(input("Do you know somebody suspicious?: ")))
